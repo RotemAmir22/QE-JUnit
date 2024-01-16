@@ -1,0 +1,9 @@
+TO-DO:
+# addBook - missing DB addBook test (valid parameters)
+# isISBNValid - DONE 
+# isAuthorValid - missing invalid name test
+# registerUser - 
+# borrowBook - 
+# returnBook -
+# notifyUserWithBookReviews -
+# getBookByISBN - DONE

@@ -176,6 +176,8 @@ public class TestLibrary {
         assertEquals("Invalid author.",e.getMessage());
     }
 
+    //TODO: add AuthorInvalid test
+
     @Test
     void GivenBorrowedBook_WhenaddBook_ThenIllegalArgumentException_Bookwithinvalidborrowedstate() {
         // Mock the behavior of the databaseService
@@ -232,24 +234,25 @@ public class TestLibrary {
     }
 
 
+    //TODO: Rotem
     @Test
     void registerUser() {
     }
 
+    //TODO: Noam
     @Test
     void borrowBook() {
     }
 
+    //TODO: Noam
     @Test
     void returnBook() {
     }
 
+    //TODO: Rotem
     @Test
     void notifyUserWithBookReviews() {
     }
 
-    @Test
-    void getBookByISBN() {
-    }
 // Implement here
 }
