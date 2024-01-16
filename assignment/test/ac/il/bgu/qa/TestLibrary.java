@@ -1,5 +1,7 @@
 package ac.il.bgu.qa;
 
+import ac.il.bgu.qa.errors.BookNotFoundException;
+import ac.il.bgu.qa.errors.UserNotRegisteredException;
 import ac.il.bgu.qa.services.DatabaseService;
 import ac.il.bgu.qa.services.ReviewService;
 import org.junit.jupiter.api.*;
@@ -21,23 +23,15 @@ public class TestLibrary {
     @Mock
     ReviewService mockReviewApiServer;
 
+    @Mock
+    User mockUserApiClient;
+
     @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
         testLibrary = new Library(mockDBApiServer,mockReviewApiServer);
     }
 
-    //        } else if (book.getTitle() == null || book.getTitle().equals("")) {
-    //            throw new IllegalArgumentException("Invalid title.");
-    //        } else if (!isAuthorValid(book.getAuthor())) {
-    //            throw new IllegalArgumentException("Invalid author.");
-    //        } else if (book.isBorrowed()) {
-    //            throw new IllegalArgumentException("Book with invalid borrowed state.");
-    //        }
-    //
-    //        // If book already exists in the database, throw exception
-    //        if (databaseService.getBookByISBN(book.getISBN()) != null)
-    //            throw new IllegalArgumentException("Book already exists.");
     @Test
     void GivenNullBook_WhenaddBook_ThenIllegalArgumentException_Invalidbook() {
         // Act
@@ -241,7 +235,90 @@ public class TestLibrary {
 
     //TODO: Noam
     @Test
-    void borrowBook() {
+    void GivenNoBookISBN_WhenborrowBook_ThenBookNotFoundException_Booknotfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
+        when(mockUserApiClient.getId()).thenReturn("12345");
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(BookNotFoundException.class,e.getClass());
+        assertEquals("Book not found!",e.getMessage());
+
+    }
+
+    @Test
+    void GivenInvaliduserId_WhenborrowBook_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("12345");
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user Id.",e.getMessage());
+
+    }
+    @Test
+    void GivenNulluserId_WhenborrowBook_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn(null);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user Id.",e.getMessage());
+
+    }
+    @Test
+    void GivenNoRealuserId_WhenborrowBook_ThenUserNotRegisteredException_Usernotfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(null);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(UserNotRegisteredException.class,e.getClass());
+        assertEquals("User not found!",e.getMessage());
+
+    }
+
+    @Test
+    void GivenISBNuserId_WhenborrowBook_ThenborrowBook() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+        when(mockBookApiClient.isBorrowed()).thenReturn(false);
+        // verify
+        //verify(mockDBApiServer).borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+
     }
 
     //TODO: Noam

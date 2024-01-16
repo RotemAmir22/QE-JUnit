@@ -3,7 +3,7 @@ TO-DO:
 # isISBNValid - DONE 
 # isAuthorValid - missing invalid name test
 # registerUser - 
-# borrowBook - 
+# borrowBook - missing DB borrowBook test (valid parameters)
 # returnBook -
 # notifyUserWithBookReviews -
 # getBookByISBN - DONE
