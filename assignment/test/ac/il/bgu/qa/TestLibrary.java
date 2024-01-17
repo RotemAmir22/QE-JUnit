@@ -1,5 +1,6 @@
 package ac.il.bgu.qa;
 
+import ac.il.bgu.qa.errors.BookNotBorrowedException;
 import ac.il.bgu.qa.errors.BookNotFoundException;
 import ac.il.bgu.qa.errors.UserNotRegisteredException;
 import ac.il.bgu.qa.services.DatabaseService;
@@ -223,7 +224,7 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
 
         // Verify
-        //verify(mockDBApiServer,times(1)).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
 
     }
 
@@ -317,13 +318,35 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
         // verify
-        //verify(mockDBApiServer).borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        verify(mockBookApiClient,never()).borrow();
+        verify(mockDBApiServer,never()).borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
 
     }
 
-    //TODO: Noam
     @Test
-    void returnBook() {
+    void GivenNoBorrowedBookISBN_WhenreturnBook_ThenBookNotBorrowedException_Bookwasntborrowed() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockBookApiClient.isBorrowed()).thenReturn(false);
+
+        Exception e = new Exception();
+        try{
+            testLibrary.returnBook(mockBookApiClient.getISBN());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        assertEquals(BookNotBorrowedException.class,e.getClass());
+        assertEquals("Book wasn't borrowed!",e.getMessage());
+    }
+    @Test
+    void GivenBorrowedBookISBN_WhenreturnBook_ThenreturnBook() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockBookApiClient.isBorrowed()).thenReturn(true);
+        // verify
+        verify(mockBookApiClient,never()).returnBook();
+        verify(mockDBApiServer,never()).returnBook(mockBookApiClient.getISBN());
     }
 
     //TODO: Rotem
