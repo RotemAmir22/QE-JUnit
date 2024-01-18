@@ -2,12 +2,17 @@ package ac.il.bgu.qa;
 
 import ac.il.bgu.qa.errors.BookNotBorrowedException;
 import ac.il.bgu.qa.errors.BookNotFoundException;
+import ac.il.bgu.qa.errors.NoReviewsFoundException;
 import ac.il.bgu.qa.errors.UserNotRegisteredException;
 import ac.il.bgu.qa.services.DatabaseService;
+import ac.il.bgu.qa.services.NotificationService;
 import ac.il.bgu.qa.services.ReviewService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
 import org.mockito.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -26,6 +31,9 @@ public class TestLibrary {
 
     @Mock
     User mockUserApiClient;
+
+    @Mock
+    NotificationService mockNotificationApiClient;
 
     @BeforeEach
     public void init() {
@@ -229,9 +237,132 @@ public class TestLibrary {
     }
 
 
-    //TODO: Rotem
+    //Register User
     @Test
-    void registerUser() {
+    void GivenUserNull_whenregisterUser_ThenIllegalArgumentException_Invaliduser() {
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(null);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user.",e.getMessage());
+    }
+
+    @Test
+    void GivenUserNullID_whenregisterUser_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockUserApiClient.getId()).thenReturn(null);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user Id.",e.getMessage());
+    }
+
+    @Test
+    void GivenUserIDLenNot12_whenregisterUser_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockUserApiClient.getId()).thenReturn("123456");
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user Id.",e.getMessage());
+    }
+
+    @Test
+    void GivenUserNameNull_whenregisterUser_ThenIllegalArgumentException_Invalidusername() {
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockUserApiClient.getName()).thenReturn(null);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user name.",e.getMessage());
+    }
+
+    @Test
+    void GivenUserEmptyName_whenregisterUser_ThenIllegalArgumentException_Invalidusername() {
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockUserApiClient.getName()).thenReturn("");
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid user name.",e.getMessage());
+    }
+
+    @Test
+    void GivenUserwithNullNotificationService_whenregisterUser_ThenIllegalArgumentException_Invalidnotificationservice() {
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockUserApiClient.getName()).thenReturn("Noa");
+        when(mockUserApiClient.getNotificationService()).thenReturn(null);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid notification service.",e.getMessage());
+    }
+
+    @Test
+    void GivenExsistingUser_whenregisterUser_ThenIllegalArgumentException_Useralreadyexists() {
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockUserApiClient.getName()).thenReturn("Noa");
+        when(mockUserApiClient.getNotificationService()).thenReturn(mockNotificationApiClient);
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.registerUser(mockUserApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        // Assertions
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("User already exists.",e.getMessage());
+    }
+
+    @Test
+    void GivenNewUser_whenregisterUser_ThenAddUser() {
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockUserApiClient.getName()).thenReturn("Noa");
+        when(mockUserApiClient.getNotificationService()).thenReturn(mockNotificationApiClient);
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(null);
+
+        verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+
     }
 
     //TODO: Noam
@@ -349,10 +480,97 @@ public class TestLibrary {
         verify(mockDBApiServer,never()).returnBook(mockBookApiClient.getISBN());
     }
 
+   // public void notifyUserWithBookReviews(String ISBN, String userId) {
+        //        Validate the ISBN. If it's invalid, throw an exception.
+        //        if (!isISBNValid(ISBN)) {
+        //            throw new IllegalArgumentException("Invalid ISBN.");
+        //        }
+        //         Validate the user Id format (should be a 12-digit number).
+        //         If it's invalid, throw an exception.
+        //        if (userId == null || !userId.matches("\\d{12}")) {
+        //            throw new IllegalArgumentException("Invalid user Id.");
+        //        }
+        //         Retrieve the book associated with the ISBN from the database.
+        //        Book book = databaseService.getBookByISBN(ISBN);
+        //        // If no book is found for the given ISBN, throw a book not found exception.
+        //        if (book == null) {
+        //            throw new BookNotFoundException("Book not found!");
+        //        }
+        //        // Retrieve the user associated with the user Id from the database.
+        //        User user = databaseService.getUserById(userId);
+        //        // If the user is not found in the database, throw an exception.
+        //        if (user == null) {
+        //            throw new UserNotRegisteredException("User not found!");
+        //        }
+        //        // Fetch the list of reviews for the specified book using the review service.
+        //        List<String> reviews;
+        //        try {
+        //            reviews = reviewService.getReviewsForBook(ISBN);
+        //            // If no reviews are found or the review list is empty, throw an exception.
+        //            if (reviews == null || reviews.isEmpty()) {
+        //                throw new NoReviewsFoundException("No reviews found!");
+        //            }
     //TODO: Rotem
+    //        } catch (ReviewException e) {
+    //            // If there's an issue fetching the reviews, throw a service unavailable exception.
+    //            throw new ReviewServiceUnavailableException("Review service unavailable!");
+    //        } finally {
+    //            // Always close the review service connection after attempting to fetch the reviews.
+    //            reviewService.close();
+    //        }
+    //        // Construct the notification message containing the book's title and its reviews.
+    //        String notificationMessage = "Reviews for '" + book.getTitle() + "':\n" + String.join("\n", reviews);
+    //        // Attempt to send the notification to the user. If it fails, retry up to 5 times.
+    //        int retryCount = 0;
+    //        while (retryCount < 5) {
+    //            try {
+    //                user.sendNotification(notificationMessage);
+    //                return;
+    //            } catch (NotificationException e) {
+    //                retryCount++;
+    //                System.err.println("Notification failed! Retrying attempt " + retryCount + "/5");
+    //            }
+    //        }
+    //        // If all retry attempts fail, throw a notification exception.
+    //        throw new NotificationException("Notification failed!");
+    //    }
+
     @Test
-    void notifyUserWithBookReviews() {
+    void GivenBookWithNullReviews_WhennotifyUserWithBookReviews_ThenNoReviewsFoundException_Noreviewsfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+
+        when(mockReviewApiServer.getReviewsForBook("Lord of the Rings")).thenReturn(null);
+        Exception e = new Exception();
+        try{
+            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        assertEquals(NoReviewsFoundException.class,e.getClass());
+        assertEquals("No reviews found!",e.getMessage());
     }
 
-// Implement here
+    @Test
+    void GivenBookWithEmptyReviews_WhennotifyUserWithBookReviews_ThenNoReviewsFoundException_Noreviewsfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+
+        when(mockReviewApiServer.getReviewsForBook("Lord of the Rings")).thenReturn(new ArrayList<String>());
+        Exception e = new Exception();
+        try{
+            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        assertEquals(NoReviewsFoundException.class,e.getClass());
+        assertEquals("No reviews found!",e.getMessage());
+    }
+
 }
