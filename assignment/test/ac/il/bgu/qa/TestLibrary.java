@@ -8,7 +8,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.*;
 import org.mockito.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +39,7 @@ public class TestLibrary {
         testLibrary = new Library(mockDBApiServer,mockReviewApiServer);
     }
 
+    //Add book
     @Test
     void GivenNullBook_WhenaddBook_ThenIllegalArgumentException_Invalidbook() {
         // Act
@@ -230,11 +230,12 @@ public class TestLibrary {
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
 
+        testLibrary.addBook(mockBookApiClient);
+
         // Verify
-        verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockDBApiServer,times(1)).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
 
     }
-
 
     //Register User
     @Test
@@ -360,11 +361,13 @@ public class TestLibrary {
         when(mockUserApiClient.getNotificationService()).thenReturn(mockNotificationApiClient);
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(null);
 
-        verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+        testLibrary.registerUser(mockUserApiClient);
+
+        verify(mockDBApiServer,times(1)).registerUser(mockUserApiClient.getId(),mockUserApiClient);
 
     }
 
-    //TODO: Noam
+    //Borrow Book
     @Test
     void GivenNoBookISBN_WhenborrowBook_ThenBookNotFoundException_Booknotfound() {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
@@ -447,9 +450,12 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("111111111111");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
+
+        testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+
         // verify
-        verify(mockBookApiClient,never()).borrow();
-        verify(mockDBApiServer,never()).borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
+        verify(mockBookApiClient,times(1)).borrow();
+        verify(mockDBApiServer,times(1)).borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
 
     }
 
@@ -474,66 +480,15 @@ public class TestLibrary {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockBookApiClient.isBorrowed()).thenReturn(true);
+
+        testLibrary.returnBook(mockBookApiClient.getISBN());
+
         // verify
-        verify(mockBookApiClient,never()).returnBook();
-        verify(mockDBApiServer,never()).returnBook(mockBookApiClient.getISBN());
+        verify(mockBookApiClient,times(1)).returnBook();
+        verify(mockDBApiServer,times(1)).returnBook(mockBookApiClient.getISBN());
     }
 
-   // public void notifyUserWithBookReviews(String ISBN, String userId) {
-        //        Validate the ISBN. If it's invalid, throw an exception.
-        //        if (!isISBNValid(ISBN)) {
-        //            throw new IllegalArgumentException("Invalid ISBN.");
-        //        }
-        //         Validate the user Id format (should be a 12-digit number).
-        //         If it's invalid, throw an exception.
-        //        if (userId == null || !userId.matches("\\d{12}")) {
-        //            throw new IllegalArgumentException("Invalid user Id.");
-        //        }
-        //         Retrieve the book associated with the ISBN from the database.
-        //        Book book = databaseService.getBookByISBN(ISBN);
-        //        // If no book is found for the given ISBN, throw a book not found exception.
-        //        if (book == null) {
-        //            throw new BookNotFoundException("Book not found!");
-        //        }
-        //        // Retrieve the user associated with the user Id from the database.
-        //        User user = databaseService.getUserById(userId);
-        //        // If the user is not found in the database, throw an exception.
-        //        if (user == null) {
-        //            throw new UserNotRegisteredException("User not found!");
-        //        }
-        //        // Fetch the list of reviews for the specified book using the review service.
-        //        List<String> reviews;
-        //        try {
-        //            reviews = reviewService.getReviewsForBook(ISBN);
-        //            // If no reviews are found or the review list is empty, throw an exception.
-        //            if (reviews == null || reviews.isEmpty()) {
-        //                throw new NoReviewsFoundException("No reviews found!");
-        //            }
-    //        } catch (ReviewException e) {
-    //            // If there's an issue fetching the reviews, throw a service unavailable exception.
-    //            throw new ReviewServiceUnavailableException("Review service unavailable!");
-    //        } finally {
-    //            // Always close the review service connection after attempting to fetch the reviews.
-    //            reviewService.close();
-    //        }
-    //TODO: Rotem
-    //        // Construct the notification message containing the book's title and its reviews.
-    //        String notificationMessage = "Reviews for '" + book.getTitle() + "':\n" + String.join("\n", reviews);
-    //        // Attempt to send the notification to the user. If it fails, retry up to 5 times.
-    //        int retryCount = 0;
-    //        while (retryCount < 5) {
-    //            try {
-    //                user.sendNotification(notificationMessage);
-    //                return;
-    //            } catch (NotificationException e) {
-    //                retryCount++;
-    //                System.err.println("Notification failed! Retrying attempt " + retryCount + "/5");
-    //            }
-    //        }
-    //        // If all retry attempts fail, throw a notification exception.
-    //        throw new NotificationException("Notification failed!");
-    //    }
-
+    //Notify User
     @Test
     void GivenBookWithNullReviews_WhennotifyUserWithBookReviews_ThenNoReviewsFoundException_Noreviewsfound() {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
@@ -560,7 +515,7 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
 
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(new ArrayList<String>());
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(new ArrayList<>());
         Exception e = new Exception();
         try{
             testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
@@ -590,38 +545,42 @@ public class TestLibrary {
         assertEquals("Review service unavailable!",e.getMessage());
     }
 
-    //TODO:fix this test! - need to throw notification exception
-//    @Test
-//    void GivenBookWithReviewsAndNotifyServiceNotWorking_WhenNotifyUserWithBookReviews_ThenThrowNotificationException() {
-//        // Mock setup for dependent services
-//        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
-//        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
-//        when(mockUserApiClient.getId()).thenReturn("123456789012");
-//        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
-//
-//        List<String> reviews = new ArrayList<>();
-//        reviews.add("review 1");
-//        reviews.add("review 2");
-//
-//        when(mockBookApiClient.getTitle()).thenReturn("Lord of the Rings");
-//        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
-//
-//        // Setting up the mock to throw an exception for the first call, and do nothing for the next four calls
-//        String notification = "Note";
-//        doThrow(new NotificationException("Notification failed!"))
-//                .doNothing().doNothing().doNothing().doNothing()
-//                .when(mockUserApiClient).sendNotification(notification);
-//
-//        // Executing the test method and catching the specific exception
-//        NotificationException thrownException = assertThrows(NotificationException.class, () ->
-//                testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(), mockUserApiClient.getId())
-//        );
-//
-//        // Assertions
-//        assertEquals("Notification failed!", thrownException.getMessage());
-//        verify(mockUserApiClient, times(5)).sendNotification(notification); // Verifying retry logic
-//        verify(mockReviewApiServer, never()).close();
-//    }
+    @Test
+    void GivenBookWithReviewsAndNotifyServiceNotWorking_WhenNotifyUserWithBookReviews_ThenThrowNotificationException_Notificationfailed() {
+        // Mock setup for dependent services
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("123456789012");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+
+        List<String> reviews = new ArrayList<>();
+        reviews.add("review 1");
+        reviews.add("review 2");
+
+        when(mockBookApiClient.getTitle()).thenReturn("Lord of the Rings");
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
+
+        // Setting up the mock to throw an exception for the first call, and do nothing for the next four calls
+        String notification = "Reviews for 'Lord of the Rings':\n" +
+                "review 1\n" +
+                "review 2";
+        doThrow(new NotificationException("Notification failed!")).when(mockUserApiClient).sendNotification(notification);
+
+        Exception e = new Exception();
+        try{
+            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+
+        // Assertions
+        assertEquals(NotificationException.class,e.getClass());
+        assertEquals("Notification failed!",e.getMessage());
+
+        verify(mockUserApiClient, times(5)).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, times(1)).close();
+    }
 
     @Test
     void GivenBookwithReviews_WhennotifyUserWithBookReviews_ThenNotifyUser() {
@@ -634,7 +593,9 @@ public class TestLibrary {
         reviews.add("review 2");
         when(mockBookApiClient.getTitle()).thenReturn("Lord of te Rings");
         when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
-        verify(mockReviewApiServer,never()).close();
+
+        testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        verify(mockReviewApiServer,times(1)).close();
     }
 
 }
