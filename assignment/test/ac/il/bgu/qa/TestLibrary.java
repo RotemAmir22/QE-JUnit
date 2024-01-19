@@ -56,6 +56,7 @@ public class TestLibrary {
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).getTitle();
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(2)).getISBN();
     }
 
     @Test
@@ -79,6 +80,8 @@ public class TestLibrary {
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).getTitle();
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+
     }
 
     @Test
@@ -102,6 +105,7 @@ public class TestLibrary {
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).getTitle();
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
     }
 
     @Test
@@ -148,6 +152,8 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(1)).getTitle();
     }
 
     @Test
@@ -171,6 +177,8 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
     }
     @Test
     void GivenNullAuthor_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
@@ -194,6 +202,9 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
     }
 
     @Test
@@ -218,6 +229,35 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
+    }
+    @Test
+    void GivenInvalidAuthorNameStart_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
+        // Mock the behavior of the mockBookApiClient
+
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockBookApiClient.getTitle()).thenReturn("New-Book");
+        when(mockBookApiClient.getAuthor()).thenReturn("!@#James");
+        // Act
+        Exception e = new Exception();
+        try{
+            testLibrary.addBook(mockBookApiClient);
+        }
+        catch (Exception e1){
+            e = e1;
+        }
+        assertEquals(IllegalArgumentException.class,e.getClass());
+        assertEquals("Invalid author.",e.getMessage());
+
+        // Verify
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
     }
 
     @Test
@@ -242,6 +282,9 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
     }
     @Test
     void GivenInvalidAuthorNameMiddle_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
@@ -265,6 +308,9 @@ public class TestLibrary {
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
         verify(mockBookApiClient, never()).isBorrowed();
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
     }
 
     @Test
@@ -290,6 +336,11 @@ public class TestLibrary {
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockBookApiClient,times(3)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
+        verify(mockBookApiClient,times(1)).isBorrowed();
+
     }
     @Test
     void GivenExistBook_WhenaddBook_ThenIllegalArgumentException_Bookalreadyexists() {
@@ -314,6 +365,12 @@ public class TestLibrary {
         // Verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,never()).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockBookApiClient,times(5)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
+        verify(mockBookApiClient,times(1)).isBorrowed();
+
+
     }
     @Test
     void GivenNewBook_WhenaddBook_ThenBookAdded() {
@@ -330,6 +387,10 @@ public class TestLibrary {
         // Verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockDBApiServer,times(1)).addBook(mockBookApiClient.getISBN(),mockBookApiClient);
+        verify(mockBookApiClient,times(6)).getISBN();
+        verify(mockBookApiClient,times(2)).getTitle();
+        verify(mockBookApiClient,times(1)).getAuthor();
+        verify(mockBookApiClient,times(1)).isBorrowed();
 
     }
 
@@ -369,6 +430,7 @@ public class TestLibrary {
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
         verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+        verify(mockUserApiClient,times(3)).getId();
     }
 
     @Test
@@ -389,6 +451,7 @@ public class TestLibrary {
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
         verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+        verify(mockUserApiClient,times(4)).getId();
     }
 
     @Test
@@ -410,6 +473,8 @@ public class TestLibrary {
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
         verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+        verify(mockUserApiClient,times(4)).getId();
+        verify(mockUserApiClient,times(1)).getName();
     }
 
     @Test
@@ -431,6 +496,8 @@ public class TestLibrary {
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
         verify(mockDBApiServer,never()).registerUser(mockUserApiClient.getId(),mockUserApiClient);
+        verify(mockUserApiClient,times(4)).getId();
+        verify(mockUserApiClient,times(2)).getName();
     }
 
     @Test
