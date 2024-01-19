@@ -60,7 +60,7 @@ public class TestLibrary {
 
     @Test
     void GivenNullISBN_WhenaddBook_ThenIllegalArgumentException_InvalidISBN() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn(null);
         // Act
@@ -83,7 +83,7 @@ public class TestLibrary {
 
     @Test
     void GivenNot13LenISBN_WhenaddBook_ThenIllegalArgumentException_InvalidISBN() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410");
         // Act
@@ -106,7 +106,7 @@ public class TestLibrary {
 
     @Test
     void GivenInvalidISBN_WhenaddBook_ThenIllegalArgumentException_InvalidISBN() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410!");
         // Act
@@ -129,7 +129,7 @@ public class TestLibrary {
 
     @Test
     void GivenNullTitle_WhenaddBook_ThenIllegalArgumentException_Invalidtitle() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn(null);
@@ -152,7 +152,7 @@ public class TestLibrary {
 
     @Test
     void GivenEmptyTitle_WhenaddBook_ThenIllegalArgumentException_Invalidtitle() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("");
@@ -174,7 +174,7 @@ public class TestLibrary {
     }
     @Test
     void GivenNullAuthor_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -198,7 +198,7 @@ public class TestLibrary {
 
     @Test
     void GivenEmptyAuthor_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -222,7 +222,7 @@ public class TestLibrary {
 
     @Test
     void GivenInvalidAuthorNameEnd_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -245,7 +245,7 @@ public class TestLibrary {
     }
     @Test
     void GivenInvalidAuthorNameMiddle_WhenaddBook_ThenIllegalArgumentException_Invalidauthor() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -269,7 +269,7 @@ public class TestLibrary {
 
     @Test
     void GivenBorrowedBook_WhenaddBook_ThenIllegalArgumentException_Bookwithinvalidborrowedstate() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -293,7 +293,7 @@ public class TestLibrary {
     }
     @Test
     void GivenExistBook_WhenaddBook_ThenIllegalArgumentException_Bookalreadyexists() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
@@ -317,7 +317,7 @@ public class TestLibrary {
     }
     @Test
     void GivenNewBook_WhenaddBook_ThenBookAdded() {
-        // Mock the behavior of the databaseService
+        // Mock the behavior of the databaseService and mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
