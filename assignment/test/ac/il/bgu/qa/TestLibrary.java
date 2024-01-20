@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class TestLibrary {
@@ -47,15 +48,9 @@ public class TestLibrary {
     @Test
     void GivenNullBook_WhenaddBook_ThenIllegalArgumentException_Invalidbook() {
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(null);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid book.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(null));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid book.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -71,15 +66,9 @@ public class TestLibrary {
 
         when(mockBookApiClient.getISBN()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid ISBN.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -91,21 +80,16 @@ public class TestLibrary {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"978-3-16-148410!","978-3-16-148410","aab-fjfks-gnd"})
+    @ValueSource(strings = {"978-3-16-148410-2","978-3-16-148410!","978-3-16-148410","aab-fjfks-gnd"})
     void GivenInvalidISBN_WhenaddBook_ThenIllegalArgumentException_InvalidISBN(String isbn) {
         // Mock the behavior of the mockBookApiClient
 
         when(mockBookApiClient.getISBN()).thenReturn(isbn);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid ISBN.",e.getMessage());
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -121,15 +105,9 @@ public class TestLibrary {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid title.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid title.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -146,15 +124,9 @@ public class TestLibrary {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockBookApiClient.getTitle()).thenReturn("");
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid title.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid title.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -171,15 +143,10 @@ public class TestLibrary {
         when(mockBookApiClient.getTitle()).thenReturn("New-Book");
         when(mockBookApiClient.getAuthor()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid author.",e.getMessage());
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid author.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -191,7 +158,7 @@ public class TestLibrary {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"","!@#James", "James!@#", "12345", "James!@#Bond"})
+    @ValueSource(strings = {"","Harry--Barry","!@#James", "James!@#", "12345", "James!@#Bond"})
     void GivenInvalidAuthorName_WhenAddBook_ThenIllegalArgumentException(String authorName) {
         // Mock the behavior of the mockBookApiClient
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
@@ -199,15 +166,9 @@ public class TestLibrary {
         when(mockBookApiClient.getAuthor()).thenReturn(authorName);
 
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid author.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid author.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -228,15 +189,9 @@ public class TestLibrary {
         when(mockBookApiClient.isBorrowed()).thenReturn(true);
 
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Book with invalid borrowed state.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Book with invalid borrowed state.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -257,15 +212,9 @@ public class TestLibrary {
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.addBook(mockBookApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Book already exists.",e.getMessage());
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.addBook(mockBookApiClient));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Book already exists.",thrown.getMessage());
 
         // Verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -299,7 +248,6 @@ public class TestLibrary {
 
     }
 
-    //TODO: Noam
     //Borrow Book
     @Test
     void GivenNoBookISBN_WhenborrowBook_ThenBookNotFoundException_Booknotfound() {
@@ -307,16 +255,29 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
         when(mockUserApiClient.getId()).thenReturn("12345");
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        BookNotFoundException thrown = assertThrows(BookNotFoundException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
         // Assertions
-        assertEquals(BookNotFoundException.class,e.getClass());
-        assertEquals("Book not found!",e.getMessage());
+        assertEquals(BookNotFoundException.class,thrown.getClass());
+        assertEquals("Book not found!",thrown.getMessage());
+
+        // verify
+        verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockBookApiClient, never()).borrow();
+        verify(mockDBApiServer, never()).borrowBook(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+
+    }
+    @Test
+    void GivenBrrowedISBNBook_WhenborrowBook_ThenBookNotFoundException_Bookisalreadyborrowed() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+        when(mockBookApiClient.isBorrowed()).thenReturn(true);
+        // Act
+        BookAlreadyBorrowedException thrown = assertThrows(BookAlreadyBorrowedException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
+        // Assertions
+        assertEquals(BookAlreadyBorrowedException.class,thrown.getClass());
+        assertEquals("Book is already borrowed!",thrown.getMessage());
 
         // verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -331,16 +292,10 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockUserApiClient.getId()).thenReturn("12345");
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user Id.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
 
         // verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -354,23 +309,15 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockUserApiClient.getId()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user Id.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
 
         // verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
         verify(mockBookApiClient, never()).borrow();
         verify(mockDBApiServer, never()).borrowBook(mockBookApiClient.getISBN(),mockUserApiClient.getId());
-
-
 
     }
     @Test
@@ -380,16 +327,10 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("111111111111");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        UserNotRegisteredException thrown = assertThrows(UserNotRegisteredException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
         // Assertions
-        assertEquals(UserNotRegisteredException.class,e.getClass());
-        assertEquals("User not found!",e.getMessage());
+        assertEquals(UserNotRegisteredException.class,thrown.getClass());
+        assertEquals("User not found!",thrown.getMessage());
 
         // verify
         verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -421,15 +362,38 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
 
-        Exception e = new Exception();
-        try{
-            testLibrary.returnBook(mockBookApiClient.getISBN());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(BookNotBorrowedException.class,e.getClass());
-        assertEquals("Book wasn't borrowed!",e.getMessage());
+
+        BookNotBorrowedException thrown = assertThrows(BookNotBorrowedException.class,() ->testLibrary.returnBook(mockBookApiClient.getISBN()));
+
+        assertEquals(BookNotBorrowedException.class,thrown.getClass());
+        assertEquals("Book wasn't borrowed!",thrown.getMessage());
+
+        // verify
+        verify(mockBookApiClient,never()).returnBook();
+        verify(mockDBApiServer,never()).returnBook(mockBookApiClient.getISBN());
+    }
+    @Test
+    void GivenNullBorrowedBookISBN_WhenreturnBook_ThenBookNotFoundException_Booknotfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
+
+        BookNotFoundException thrown = assertThrows(BookNotFoundException.class,() ->testLibrary.returnBook(mockBookApiClient.getISBN()));
+
+        assertEquals(BookNotFoundException.class,thrown.getClass());
+        assertEquals("Book not found!",thrown.getMessage());
+
+        // verify
+        verify(mockBookApiClient,never()).returnBook();
+        verify(mockDBApiServer,never()).returnBook(mockBookApiClient.getISBN());
+    }
+    @Test
+    void GivenInvalidBorrowedBookISBN_WhenreturnBook_ThenBookNotBorrowedException_Bookwasntborrowed() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.returnBook(mockBookApiClient.getISBN()));
+
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
 
         // verify
         verify(mockBookApiClient,never()).returnBook();
@@ -451,15 +415,11 @@ public class TestLibrary {
     //Register User
     @Test
     void GivenUserNull_whenregisterUser_ThenIllegalArgumentException_Invaliduser() {
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(null);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user.",e.getMessage());
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(null));
+
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -470,16 +430,10 @@ public class TestLibrary {
     void GivenUserNullID_whenregisterUser_ThenIllegalArgumentException_InvaliduserId() {
         when(mockUserApiClient.getId()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user Id.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -491,16 +445,11 @@ public class TestLibrary {
     void GivenUserIDLenNot12_whenregisterUser_ThenIllegalArgumentException_InvaliduserId() {
         when(mockUserApiClient.getId()).thenReturn("123456");
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
+
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user Id.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -513,16 +462,12 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockUserApiClient.getName()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
+
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user name.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user name.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -536,16 +481,11 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockUserApiClient.getName()).thenReturn("");
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
+
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid user name.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user name.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -560,16 +500,12 @@ public class TestLibrary {
         when(mockUserApiClient.getName()).thenReturn("Noa");
         when(mockUserApiClient.getNotificationService()).thenReturn(null);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
+
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("Invalid notification service.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid notification service.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
@@ -583,16 +519,12 @@ public class TestLibrary {
         when(mockUserApiClient.getNotificationService()).thenReturn(mockNotificationApiClient);
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         // Act
-        Exception e = new Exception();
-        try{
-            testLibrary.registerUser(mockUserApiClient);
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.registerUser(mockUserApiClient));
+
         // Assertions
-        assertEquals(IllegalArgumentException.class,e.getClass());
-        assertEquals("User already exists.",e.getMessage());
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("User already exists.",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,times(1)).getUserById(mockUserApiClient.getId());
@@ -621,17 +553,11 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(null);
 
-        Exception e = new Exception();
-        try{
-            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        NoReviewsFoundException thrown = assertThrows(NoReviewsFoundException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
 
         //Assertions
-        assertEquals(NoReviewsFoundException.class,e.getClass());
-        assertEquals("No reviews found!",e.getMessage());
+        assertEquals(NoReviewsFoundException.class,thrown.getClass());
+        assertEquals("No reviews found!",thrown.getMessage());
 
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
@@ -651,16 +577,9 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(new ArrayList<>());
 
-        Exception e = new Exception();
-        try{
-            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
-
-        assertEquals(NoReviewsFoundException.class,e.getClass());
-        assertEquals("No reviews found!",e.getMessage());
+        NoReviewsFoundException thrown = assertThrows(NoReviewsFoundException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(NoReviewsFoundException.class,thrown.getClass());
+        assertEquals("No reviews found!",thrown.getMessage());
 
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
@@ -679,16 +598,11 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenThrow(new ReviewServiceUnavailableException("Review service unavailable!"));
 
-        Exception e = new Exception();
-        try{
-            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
 
-        assertEquals(ReviewServiceUnavailableException.class,e.getClass());
-        assertEquals("Review service unavailable!",e.getMessage());
+        ReviewServiceUnavailableException thrown = assertThrows(ReviewServiceUnavailableException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        assertEquals(ReviewServiceUnavailableException.class,thrown.getClass());
+        assertEquals("Review service unavailable!",thrown.getMessage());
 
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
@@ -717,17 +631,11 @@ public class TestLibrary {
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         doThrow(new NotificationException("Notification failed!")).when(mockUserApiClient).sendNotification(notification);
 
-        Exception e = new Exception();
-        try{
-            testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
-        }
-        catch (Exception e1){
-            e = e1;
-        }
+        NotificationException thrown = assertThrows(NotificationException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
 
         // Assertions
-        assertEquals(NotificationException.class,e.getClass());
-        assertEquals("Notification failed!",e.getMessage());
+        assertEquals(NotificationException.class,thrown.getClass());
+        assertEquals("Notification failed!",thrown.getMessage());
 
         //Verify
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
