@@ -580,6 +580,113 @@ public class TestLibrary {
 
     }
     @Test
+    void GivenInvalidId_WhennotifyUserWithBookReviews_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("123");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        //Assertions
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
+
+        //Verify
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+        verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
+        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, never()).close();
+
+    }
+
+    @Test
+    void GivenNullId_WhennotifyUserWithBookReviews_ThenIllegalArgumentException_InvaliduserId() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn(null);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        //Assertions
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
+
+        //Verify
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+        verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
+        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, never()).close();
+
+    }
+    @Test
+    void GivenNullBook_WhennotifyUserWithBookReviews_ThenBookNotFoundException_Booknotfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
+
+        BookNotFoundException thrown = assertThrows(BookNotFoundException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        //Assertions
+        assertEquals(BookNotFoundException.class,thrown.getClass());
+        assertEquals("Book not found!",thrown.getMessage());
+
+        //Verify
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+        verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
+        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, never()).close();
+
+    }
+
+    @Test
+    void GivenNullUser_WhennotifyUserWithBookReviews_ThenUserNotRegisteredException_Usernotfound() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(null);
+
+        UserNotRegisteredException thrown = assertThrows(UserNotRegisteredException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        //Assertions
+        assertEquals(UserNotRegisteredException.class,thrown.getClass());
+        assertEquals("User not found!",thrown.getMessage());
+
+        //Verify
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+        verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,times(1)).getUserById(mockUserApiClient.getId());
+        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, never()).close();
+
+    }
+//    @Test
+//    void GivenUnavailableReviewService_WhennotifyUserWithBookReviews_ThenReviewServiceUnavailableException_Reviewserviceunavailable() {
+//        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+//        when(mockUserApiClient.getId()).thenReturn("111111111111");
+//        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+//        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+//
+//        ReviewServiceUnavailableException thrown = assertThrows(ReviewServiceUnavailableException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+//
+//        //Assertions
+//        assertEquals(ReviewServiceUnavailableException.class,thrown.getClass());
+//        assertEquals("Review service unavailable!",thrown.getMessage());
+//
+//        //Verify
+//        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+//        verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
+//        verify(mockDBApiServer,times(1)).getUserById(mockUserApiClient.getId());
+//        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+//        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+//        verify(mockReviewApiServer, never()).close();
+//
+//    }
+    @Test
     void GivenBookWithNullReviews_WhennotifyUserWithBookReviews_ThenNoReviewsFoundException_Noreviewsfound() {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
@@ -630,7 +737,7 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenThrow(new ReviewServiceUnavailableException("Review service unavailable!"));
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenThrow(new ReviewException("Review service unavailable!"));
 
 
         ReviewServiceUnavailableException thrown = assertThrows(ReviewServiceUnavailableException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
