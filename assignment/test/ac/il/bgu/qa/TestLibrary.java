@@ -250,6 +250,21 @@ public class TestLibrary {
 
     //Borrow Book
     @Test
+    void GivenInvalidBookISBN_WhenborrowBook_ThenIllegalArgumentException_InvalidISBN() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410");
+        // Act
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.borrowBook(mockBookApiClient.getISBN(), mockUserApiClient.getId()));
+        // Assertions
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
+
+        // verify
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockBookApiClient, never()).borrow();
+        verify(mockDBApiServer, never()).borrowBook(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+
+    }
+    @Test
     void GivenNoBookISBN_WhenborrowBook_ThenBookNotFoundException_Booknotfound() {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
@@ -546,6 +561,25 @@ public class TestLibrary {
     }
     //Notify User
     @Test
+    void GivenInvalidBookISBN_WhennotifyUserWithBookReviews_ThenIllegalArgumentException_InvalidISBN() {
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+
+        //Assertions
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
+
+        //Verify
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+        verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
+        verify(mockDBApiServer,never()).getUserById(mockUserApiClient.getId());
+        verify(mockReviewApiServer,never()).getReviewsForBook(mockBookApiClient.getISBN());
+        verify(mockUserApiClient, never()).sendNotification(notification); // Verifying retry logic
+        verify(mockReviewApiServer, never()).close();
+
+    }
+    @Test
     void GivenBookWithNullReviews_WhennotifyUserWithBookReviews_ThenNoReviewsFoundException_Noreviewsfound() {
         when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
@@ -671,4 +705,122 @@ public class TestLibrary {
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"978-3-16-148410-2","978-3-16-148410!","978-3-16-148410","aab-fjfks-gnd"})
+    void GivenInvalidISBN_WhengetBookByISBN_Then_IllegalArgumentException_InvalidISBN(String isbn){
+        when(mockBookApiClient.getISBN()).thenReturn(isbn);
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
+
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+
+    @Test
+    void GivenNullISBN_WhengetBookByISBN_Then_IllegalArgumentException_InvalidISBN(){
+        when(mockBookApiClient.getISBN()).thenReturn(null);
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid ISBN.",thrown.getMessage());
+
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+    @Test
+    void GivenNullId_WhengetBookByISBN_ThenIllegalArgumentException_InvaliduserId(){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn(null);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
+
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+    @ParameterizedTest
+    @ValueSource(strings = {"","111111","11111111!!!","aasgdff"})
+    void GivenInvalidId_WhengetBookByISBN_ThenIllegalArgumentException_InvaliduserId(String id){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn(id);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(IllegalArgumentException.class,thrown.getClass());
+        assertEquals("Invalid user Id.",thrown.getMessage());
+
+        verify(mockDBApiServer, never()).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+
+    @Test
+    void GivenNoBookISBN_WhengetBookByISBN_ThenBookNotFoundException_Booknotfound(){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(null);
+
+        BookNotFoundException thrown = assertThrows(BookNotFoundException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(BookNotFoundException.class,thrown.getClass());
+        assertEquals("Book not found!",thrown.getMessage());
+
+        verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+    @Test
+    void GivenBorrowedBookISBN_WhengetBookByISBN_ThenBookAlreadyBorrowedException_Bookwasalreadyborrowed(){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockBookApiClient.isBorrowed()).thenReturn(true);
+
+        BookAlreadyBorrowedException thrown = assertThrows(BookAlreadyBorrowedException.class,() -> testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
+        assertEquals(BookAlreadyBorrowedException.class,thrown.getClass());
+        assertEquals("Book was already borrowed!",thrown.getMessage());
+
+        verify(mockDBApiServer, times(1)).getBookByISBN(mockBookApiClient.getISBN());
+
+    }
+    @Test
+    void GivenBookISBNAndUserId_WhengetBookByISBN_ThenreturnBook_Notificationfailed(){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+
+        when(mockBookApiClient.isBorrowed()).thenReturn(false);
+
+        Book book = testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        assertEquals(book, mockBookApiClient);
+        verify(mockDBApiServer, times(2)).getBookByISBN(mockBookApiClient.getISBN());
+
+
+    }
+
+    @Test
+    void GivenBookISBNAndUserId_WhengetBookByISBN_ThenreturnBook(){
+        when(mockBookApiClient.getISBN()).thenReturn("978-3-16-148410-0");
+        when(mockUserApiClient.getId()).thenReturn("111111111111");
+        when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
+        when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
+
+        when(mockBookApiClient.isBorrowed()).thenReturn(false);
+
+        when(mockBookApiClient.getTitle()).thenReturn("Lord of te Rings");
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
+
+        reviews.add("review 1");
+        reviews.add("review 2");
+
+        String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
+
+        Book book = testLibrary.getBookByISBN(mockBookApiClient.getISBN(),mockUserApiClient.getId());
+        assertEquals(book, mockBookApiClient);
+        verify(mockDBApiServer, times(2)).getBookByISBN(mockBookApiClient.getISBN());
+
+
+    }
 }
