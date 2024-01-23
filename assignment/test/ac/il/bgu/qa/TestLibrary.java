@@ -35,13 +35,13 @@ public class TestLibrary {
     NotificationService mockNotificationApiClient;
 
     @Spy
-    List<String> reviews;
+    List<String> spyReviewsApiClient;
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
         testLibrary = new Library(mockDBApiServer,mockReviewApiServer);
-        reviews = new ArrayList<>();
+        spyReviewsApiClient = new ArrayList<>();
     }
 
     //Add book
@@ -544,7 +544,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(IllegalArgumentException.class,thrown.getClass());
         assertEquals("Invalid ISBN.",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -564,7 +564,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(IllegalArgumentException.class,thrown.getClass());
         assertEquals("Invalid user Id.",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -585,7 +585,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(IllegalArgumentException.class,thrown.getClass());
         assertEquals("Invalid user Id.",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,never()).getBookByISBN(mockBookApiClient.getISBN());
@@ -606,7 +606,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(BookNotFoundException.class,thrown.getClass());
         assertEquals("Book not found!",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -629,7 +629,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(UserNotRegisteredException.class,thrown.getClass());
         assertEquals("User not found!",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -653,7 +653,7 @@ public class TestLibrary {
         //Assertions
         assertEquals(NoReviewsFoundException.class,thrown.getClass());
         assertEquals("No reviews found!",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -671,13 +671,13 @@ public class TestLibrary {
         when(mockDBApiServer.getBookByISBN(mockBookApiClient.getISBN())).thenReturn(mockBookApiClient);
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(new ArrayList<>());
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(spyReviewsApiClient);
         //act
         NoReviewsFoundException thrown = assertThrows(NoReviewsFoundException.class,() ->testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId()));
         //assertions
         assertEquals(NoReviewsFoundException.class,thrown.getClass());
         assertEquals("No reviews found!",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -700,7 +700,7 @@ public class TestLibrary {
         //assertions
         assertEquals(ReviewServiceUnavailableException.class,thrown.getClass());
         assertEquals("Review service unavailable!",thrown.getMessage());
-        assertEquals(0,reviews.size());
+        assertEquals(0, spyReviewsApiClient.size());
         //Verify
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -718,11 +718,11 @@ public class TestLibrary {
         when(mockUserApiClient.getId()).thenReturn("123456789012");
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
 
-        reviews.add("review 1");
-        reviews.add("review 2");
+        spyReviewsApiClient.add("review 1");
+        spyReviewsApiClient.add("review 2");
 
         when(mockBookApiClient.getTitle()).thenReturn("Lord of the Rings");
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(spyReviewsApiClient);
 
         // Setting up the mock to throw an exception for the first call, and do nothing for the next four calls
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
@@ -733,7 +733,7 @@ public class TestLibrary {
         // Assertions
         assertEquals(NotificationException.class,thrown.getClass());
         assertEquals("Notification failed!",thrown.getMessage());
-        assertEquals(2,reviews.size());
+        assertEquals(2, spyReviewsApiClient.size());
 
         //Verify
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -752,16 +752,16 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
 
         when(mockBookApiClient.getTitle()).thenReturn("Lord of te Rings");
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(spyReviewsApiClient);
         //act
-        reviews.add("review 1");
-        reviews.add("review 2");
+        spyReviewsApiClient.add("review 1");
+        spyReviewsApiClient.add("review 2");
 
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
 
         testLibrary.notifyUserWithBookReviews(mockBookApiClient.getISBN(),mockUserApiClient.getId());
         //assertion
-        assertEquals(2,reviews.size());
+        assertEquals(2, spyReviewsApiClient.size());
 
         //Verify
         verify(mockDBApiServer,times(1)).getBookByISBN(mockBookApiClient.getISBN());
@@ -890,10 +890,10 @@ public class TestLibrary {
         when(mockDBApiServer.getUserById(mockUserApiClient.getId())).thenReturn(mockUserApiClient);
         when(mockBookApiClient.isBorrowed()).thenReturn(false);
         when(mockBookApiClient.getTitle()).thenReturn("Lord of te Rings");
-        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(reviews);
+        when(mockReviewApiServer.getReviewsForBook(mockBookApiClient.getISBN())).thenReturn(spyReviewsApiClient);
         //act
-        reviews.add("review 1");
-        reviews.add("review 2");
+        spyReviewsApiClient.add("review 1");
+        spyReviewsApiClient.add("review 2");
 
         String notification = "Reviews for 'Lord of the Rings':\n" + "review 1\n" + "review 2";
 
